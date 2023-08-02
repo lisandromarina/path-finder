@@ -1,0 +1,11 @@
+.navbar{
+    background-color: #2e2d2c !important;
+    .p-toolbar-group-start{
+        display: flex;
+        gap: 40px;
+
+        .p-button .p-button-icon-left {
+            margin-right: unset
+        }
+    }
+}
