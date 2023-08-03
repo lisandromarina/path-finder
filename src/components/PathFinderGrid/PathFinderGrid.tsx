@@ -18,26 +18,36 @@ interface GridItem {
   distance: number
 }
 
-const START_NODE_ROW: number = 2;
-const START_NODE_COL: number = 2;
-const FINISH_NODE_ROW: number = 18;
-const FINISH_NODE_COL: number = 18;
+var START_NODE_ROW: number = 5;
+var START_NODE_COL: number = 10;
+var FINISH_NODE_ROW: number = 47;
+var FINISH_NODE_COL: number = 10;
 const MAX_ROW: number = 50;
 const MAX_COLUMN: number = 20;
 
 export default function PatFinderGrid(props: IPatFinderGridProps) {
   const [grid, setGrid] = useState<GridItem[][]>([]);
   const [isMousePressed, setIsMousePressed] = useState<boolean>(false);
+  const [isStartNodeDragged, setIsStartNodeDragged] = useState<boolean>(false);
+  const [isFinishNodeDragged, setIsFinishNodeDragged] = useState<boolean>(false);
+
 
   const handleOnDown = (column: number, row: number) => {
-    const newGrid = getNewGridWithWallToggled(grid, row, column);
-    setIsMousePressed(true)
-    setGrid(newGrid);
-  }
+    setIsMousePressed(true);
+    if (isStartOrFinishNode(column, row)) {
+      setIsStartNodeDragged(row === START_NODE_ROW && column === START_NODE_COL);
+      setIsFinishNodeDragged(row === FINISH_NODE_ROW && column === FINISH_NODE_COL);
+    } else {
+      const newGrid = getNewGridWithWallToggled(grid, row, column);
+      setGrid(newGrid);
+    }
+  };
 
   const handleOnUp = () => {
-    setIsMousePressed(false)
-  }
+    setIsMousePressed(false);
+    setIsStartNodeDragged(false);
+    setIsFinishNodeDragged(false);
+  };
 
   const getNewGridWithWallToggled = (grid: GridItem[][], row: number, col: number): GridItem[][] => {
     const newGrid = grid.slice();
@@ -52,9 +62,39 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
 
   const handleOnEnter = (column: number, row: number) => {
     if (isMousePressed) {
-      const newGrid = getNewGridWithWallToggled(grid, row, column);
+      const newGrid = isStartNodeDragged
+        ? moveNode(grid, row, column, true)
+        : isFinishNodeDragged
+          ? moveNode(grid, row, column, false)
+          : getNewGridWithWallToggled(grid, row, column);
       setGrid(newGrid);
     }
+  };
+
+  const moveNode = (grid: GridItem[][], newRow: number, newCol: number, isStartNode: boolean): GridItem[][] => {
+    const newGrid = grid.slice();
+    if (isStartNode) {
+      newGrid[START_NODE_ROW][START_NODE_COL].isStart = false;
+      START_NODE_ROW = newRow;
+      START_NODE_COL = newCol;
+      newGrid[newRow][newCol].isStart = true;
+    } else {
+      newGrid[FINISH_NODE_ROW][FINISH_NODE_COL].isFinish = false;
+      FINISH_NODE_ROW = newRow;
+      FINISH_NODE_COL = newCol;
+      newGrid[newRow][newCol].isFinish = true;
+    }
+    return newGrid;
+  };
+
+  function isStartOrFinishNode(column: number, row: number) {
+    const isStart = row === START_NODE_ROW && column === START_NODE_COL;
+    const isFinish = row === FINISH_NODE_ROW && column === FINISH_NODE_COL;
+
+    if (isStart || isFinish) {
+      return true
+    }
+    return false
   }
 
   const createNode = (col: number, row: number) => {
@@ -83,19 +123,25 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
   }, []);
 
   function resetGrid() {
+    const newGrid: GridItem[][] = [];
     for (let row = 0; row < MAX_ROW; row++) {
+      const currentRow: GridItem[] = [];
       for (let col = 0; col < MAX_COLUMN; col++) {
         const element = document.getElementById(`node-${row}-${col}`);
         if (element) {
-          const isStart = element?.getAttribute("id") === `node-${START_NODE_ROW}-${START_NODE_COL}`
-          const isFinish = element?.getAttribute("id") === `node-${FINISH_NODE_ROW}-${FINISH_NODE_COL}`;
+          const isStart = row === START_NODE_ROW && col === START_NODE_COL;
+          const isFinish = row === FINISH_NODE_ROW && col === FINISH_NODE_COL;
 
           if (isStart) element.className = 'node node-start';
           else if (isFinish) element.className = 'node node-finish';
-          else  element.className = 'node'
+          else element.className = 'node'
         }
+
+        currentRow.push(createNode(col, row));
       }
+      newGrid.push(currentRow);
     }
+    setGrid(newGrid);
   }
 
   function onSearch() {
@@ -137,16 +183,6 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
       }, 50 * i);
     }
   }
-
-  /*  function isStartOrFinishNode(element: HTMLElement | null) {
-     const isStart = element?.getAttribute("id") === `node-${START_NODE_ROW}-${START_NODE_COL}`;
-     const isFinish = element?.getAttribute("id") === `node-${FINISH_NODE_ROW}-${FINISH_NODE_COL}`;
- 
-     if (isStart || isFinish) {
-       return true
-     }
-     return false
-   } */
 
   useEffect(() => {
     initializeGrid()

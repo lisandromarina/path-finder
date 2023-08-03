@@ -2,7 +2,6 @@
     width: 25px;
     height: 25px;
     outline: 1px solid rgb(175, 216, 248);
-    display: inline-block;
 }
 
 .node-start {
@@ -51,7 +50,25 @@
 }
 
 .node-wall {
-    background-color: rgb(12, 53, 71);
+    animation: dropAnimation 1s ease-in-out forwards;
+}
+
+@keyframes dropAnimation {
+    0% {
+        transform: scale(1);
+    }
+
+    25% {
+        transform: scale(1.2);
+    }
+
+    60% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .node-shortest-path {

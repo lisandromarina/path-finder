@@ -41,7 +41,7 @@ export default function Node(props: INodeProps) {
             id={`node-${row}-${column}`}
             className={'node ' + extraClassName}
             onMouseDown={() => handleOnDown(column, row)}
-            onMouseUp={handleOnUp}
+            onMouseUp={()=> handleOnUp()}
             onMouseEnter={() => handleOnEnter(column, row)}
         >
         </div>
