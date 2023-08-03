@@ -6,7 +6,8 @@
 
 Path Finder is a simple and efficient pathfinding algorithm visualization tool. It enables users to explore various pathfinding algorithms and understand how they find the shortest path between two points in a grid.
 
-![Screenshot](./docs/screenshot.png)
+## Deploy Application
+To test the app: https://path-finder-app.netlify.app/
 
 ## Table of Contents
 
