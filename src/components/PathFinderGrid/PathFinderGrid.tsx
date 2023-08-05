@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Node from '../Node';
 import './PathFinderGridStyles.scss';
+import { mazeGenerationAnimations } from '../../Animations/mazeGenerationAnimations';
 import { dijkstra, getNodesInShortestPathOrder } from '../../utils/dijkstra';
+import { recursiveDivisionMaze } from '../../utils/maze';
 import Navbar from '../Navbar';
 
 export interface IPatFinderGridProps {
@@ -31,6 +33,39 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
   const [isStartNodeDragged, setIsStartNodeDragged] = useState<boolean>(false);
   const [isFinishNodeDragged, setIsFinishNodeDragged] = useState<boolean>(false);
 
+  const initializeGrid = useCallback(() => {
+    const newGrid: GridItem[][] = [];
+    for (let row = 0; row < MAX_ROW; row++) {
+      const currentRow: GridItem[] = [];
+      for (let col = 0; col < MAX_COLUMN; col++) {
+        currentRow.push(createNode(col, row));
+      }
+      newGrid.push(currentRow);
+    }
+    setGrid(newGrid);
+  }, []);
+
+  function resetGrid() {
+    const newGrid: GridItem[][] = [];
+    for (let row = 0; row < MAX_ROW; row++) {
+      const currentRow: GridItem[] = [];
+      for (let col = 0; col < MAX_COLUMN; col++) {
+        const element = document.getElementById(`node-${row}-${col}`);
+        if (element) {
+          const isStart = row === START_NODE_ROW && col === START_NODE_COL;
+          const isFinish = row === FINISH_NODE_ROW && col === FINISH_NODE_COL;
+
+          if (isStart) element.className = 'node node-start';
+          else if (isFinish) element.className = 'node node-finish';
+          else element.className = 'node'
+        }
+
+        currentRow.push(createNode(col, row));
+      }
+      newGrid.push(currentRow);
+    }
+    setGrid(newGrid);
+  }
 
   const handleOnDown = (column: number, row: number) => {
     setIsMousePressed(true);
@@ -48,6 +83,17 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
     setIsStartNodeDragged(false);
     setIsFinishNodeDragged(false);
   };
+  
+  const handleOnEnter = (column: number, row: number) => {
+    if (isMousePressed) {
+      const newGrid = isStartNodeDragged
+        ? moveNode(grid, row, column, true)
+        : isFinishNodeDragged
+          ? moveNode(grid, row, column, false)
+          : getNewGridWithWallToggled(grid, row, column);
+      setGrid(newGrid);
+    }
+  };
 
   const getNewGridWithWallToggled = (grid: GridItem[][], row: number, col: number): GridItem[][] => {
     const newGrid = grid.slice();
@@ -60,17 +106,7 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
     return newGrid;
   };
 
-  const handleOnEnter = (column: number, row: number) => {
-    if (isMousePressed) {
-      const newGrid = isStartNodeDragged
-        ? moveNode(grid, row, column, true)
-        : isFinishNodeDragged
-          ? moveNode(grid, row, column, false)
-          : getNewGridWithWallToggled(grid, row, column);
-      setGrid(newGrid);
-    }
-  };
-
+  
   const moveNode = (grid: GridItem[][], newRow: number, newCol: number, isStartNode: boolean): GridItem[][] => {
     const newGrid = grid.slice();
     if (isStartNode) {
@@ -110,40 +146,6 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
     }
   }
 
-  const initializeGrid = useCallback(() => {
-    const newGrid: GridItem[][] = [];
-    for (let row = 0; row < MAX_ROW; row++) {
-      const currentRow: GridItem[] = [];
-      for (let col = 0; col < MAX_COLUMN; col++) {
-        currentRow.push(createNode(col, row));
-      }
-      newGrid.push(currentRow);
-    }
-    setGrid(newGrid);
-  }, []);
-
-  function resetGrid() {
-    const newGrid: GridItem[][] = [];
-    for (let row = 0; row < MAX_ROW; row++) {
-      const currentRow: GridItem[] = [];
-      for (let col = 0; col < MAX_COLUMN; col++) {
-        const element = document.getElementById(`node-${row}-${col}`);
-        if (element) {
-          const isStart = row === START_NODE_ROW && col === START_NODE_COL;
-          const isFinish = row === FINISH_NODE_ROW && col === FINISH_NODE_COL;
-
-          if (isStart) element.className = 'node node-start';
-          else if (isFinish) element.className = 'node node-finish';
-          else element.className = 'node'
-        }
-
-        currentRow.push(createNode(col, row));
-      }
-      newGrid.push(currentRow);
-    }
-    setGrid(newGrid);
-  }
-
   function onSearch() {
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
@@ -152,6 +154,13 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
     animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
   }
+
+  const generateMaze = async() => {
+    const newGrid = grid.slice();    
+    let animations: any[] = [];
+    await recursiveDivisionMaze(newGrid, 0, MAX_ROW - 1, 0, MAX_COLUMN - 1, "vertical", false, "wall", animations);
+    await mazeGenerationAnimations(newGrid, animations, setGrid)
+  };
 
   function animateDijkstra(visitedNodesInOrder: any, nodesInShortestPathOrder: any) {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
@@ -193,6 +202,7 @@ export default function PatFinderGrid(props: IPatFinderGridProps) {
       <Navbar
         handleOnStart={onSearch}
         handleOnClear={resetGrid}
+        generateMaze={generateMaze}
       />
       <div className="grid">
         {grid.map((row, rowIndex) => (
