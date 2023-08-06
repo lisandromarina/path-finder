@@ -6,7 +6,7 @@ import "./NavbarStyles.scss";
 export interface INavbarProps {
     handleOnStart: () => void,
     handleOnClear: () => void,
-    generateMaze:()=> void
+    generateMaze: () => void
 }
 
 export default function Navbar(props: INavbarProps) {
@@ -18,16 +18,36 @@ export default function Navbar(props: INavbarProps) {
 
     const startContent = (
         <React.Fragment>
-            <Button label="Clear Grid" icon="pi pi-plus" className="mr-2" onClick={handleOnClear} />
-            <Button label="Start" icon="pi pi-upload" className="p-button-success" onClick={handleOnStart}/>
-            <Button label="generateMaze" icon="pi pi-upload" className="p-button-success" onClick={generateMaze}/>
+            <h4 onClick={handleOnClear} className="title">PATH FINDER VISUALIZER</h4>
+            {/* <div className='buttons-wrapper'>
+                <Button label="generateMaze" icon="pi pi-upload" className="navbar-button" onClick={generateMaze} />
+                <Button label="Start" icon="pi pi-upload" className="p-button-success visualize-button" onClick={handleOnStart} />
+                <Button label="Clear Grid" icon="pi pi-plus" className="mr-2 navbar-button" onClick={handleOnClear} />
+            </div> */}
         </React.Fragment>
     );
 
+    const centerContent = (
+        <React.Fragment>
+            <Button label="generateMaze" icon="pi pi-upload" className="navbar-button" onClick={generateMaze} />
+            <Button label="Start" icon="pi pi-upload" className="p-button-success visualize-button" onClick={handleOnStart} />
+            <Button label="Clear Grid" icon="pi pi-plus" className="mr-2 navbar-button" onClick={handleOnClear} />
+        </React.Fragment>
+    )
+
+    const endContent = (
+        <React.Fragment>
+            <h4 onClick={handleOnClear} className="title">PATH FINDER VISUALIZER</h4>
+        </React.Fragment>
+    )
+
+
     return (
         <Toolbar
-            className='navbar' 
-            start={startContent} 
+            className='navbar'
+            start={startContent}
+            center={centerContent}
+            end={endContent}
         />
     );
 }
