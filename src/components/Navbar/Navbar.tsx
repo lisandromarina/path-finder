@@ -29,7 +29,7 @@ export default function Navbar(props: INavbarProps) {
 
     const centerContent = (
         <React.Fragment>
-            <Button label="generateMaze" icon="pi pi-upload" className="navbar-button" onClick={generateMaze} />
+            <Button label="Generate Maze" icon="pi pi-upload" className="navbar-button" onClick={generateMaze} />
             <Button label="Start" icon="pi pi-upload" className="p-button-success visualize-button" onClick={handleOnStart} />
             <Button label="Clear Grid" icon="pi pi-plus" className="mr-2 navbar-button" onClick={handleOnClear} />
         </React.Fragment>
